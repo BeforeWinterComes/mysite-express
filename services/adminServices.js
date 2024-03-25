@@ -8,7 +8,11 @@ module.exports.loginService = async function (loginInfo) {
   let data = await loginDao(loginInfo);
   if (data && data.dataValues) {
     //添加token
-    data = data.dataValues;
+    data = {
+      id: data.dataValues.id,
+      loginId: data.dataValues.loginId,
+      name: data.dataValues.name,
+    };
     var loginPeriod = null;
     if (loginInfo.remember) {
       // 如果用户勾选了几天过期，则remember用这个，否则为1天
@@ -16,16 +20,13 @@ module.exports.loginService = async function (loginInfo) {
     } else {
       loginPeriod = 1;
     }
-    const token = jwt.sign(
-      {
-        id: data.id,
-        loginId: data.loginId,
-        name: data.name,
-      },
-      md5(process.env.JWT_SECRET),
-      { expiresIn: 60 * 60 * 24 * loginPeriod }
-    );
-    console.log("看一下token", token);
+    const token = jwt.sign(data, md5(process.env.JWT_SECRET), {
+      expiresIn: 60 * 60 * 24 * loginPeriod,
+    });
+    return {
+      token,
+      data,
+    };
   }
   return { data };
 };
