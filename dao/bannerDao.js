@@ -1,4 +1,4 @@
-const bannerModal = require("./model/bannerModal");
+const bannerModal = require("./model/bannerModel");
 
 // 数据库查询首页标语
 const findBannerDao = async () => {
