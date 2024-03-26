@@ -39,10 +39,19 @@ const deleteBlogTypeDao = async (id) => {
   });
 };
 
+// 根据id新增对应博客分类的文章数量
+const addBlogToType = async (id) => {
+  const data = await blogTypeModel.findByPk(id);
+  data.articleCount++;
+  await data.save();
+  return;
+};
+
 module.exports = {
   addBlogTypeDao,
   findAllBlogTypeDao,
   findOneBlogTypeDao,
   updateBlogTypeDao,
   deleteBlogTypeDao,
+  addBlogToType,
 };

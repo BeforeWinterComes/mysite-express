@@ -8,7 +8,6 @@ const {
 const { ValidationError } = require("../utils/errors");
 const validate = require("validate.js");
 const { formatResponse, handleDataPattern } = require("../utils/tool");
-const { handle } = require("express/lib/router");
 
 // 新增博客分类
 module.exports.addBlogTypeService = async function (newBlogTypeInfo) {

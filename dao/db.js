@@ -3,9 +3,21 @@ const sequelize = require("./dbConnect"); // 数据库连接实例
 const adminModel = require("./model/adminModel"); // 各种数据模型
 const bannerModal = require("./model/bannerModel"); // 标语
 const blogTypeModel = require("./model/blogTypeModel");
+const blogModel = require("./model/blogModel");
 const md5 = require("md5");
 
 (async function () {
+  // 定义模型之间的关联关系
+  // 博客和博客分类关联
+  blogTypeModel.hasMany(blogModel, {
+    foreignKey: "categoryId",
+    targetKey: "id",
+  });
+  blogModel.belongsTo(blogTypeModel, {
+    foreignKey: "categoryId",
+    targetKey: "id",
+    as: "category",
+  });
   // 将数据模型和表进行同步
   await sequelize.sync({
     alter: true,
