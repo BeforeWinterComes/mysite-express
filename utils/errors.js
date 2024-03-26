@@ -58,3 +58,5 @@ exports.UnknownError = class extends ServiceError {
     super("server internal error", 500);
   }
 };
+
+module.exports.ServiceError = ServiceError;

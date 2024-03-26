@@ -1,6 +1,7 @@
 // 该文件负责对数据库进行初始化
 const sequelize = require("./dbConnect"); // 数据库连接实例
 const adminModel = require("./model/adminModel"); // 各种数据模型
+const bannerModal = require("./model/bannerModal");
 const md5 = require("md5");
 
 (async function () {
@@ -19,6 +20,31 @@ const md5 = require("md5");
       loginPwd: md5("123456"),
     });
     console.log("初始化管理员数据完毕");
+  }
+
+  // banner进行初始化操作
+  const bannerCount = await bannerModal.count();
+  if (!bannerCount) {
+    await bannerModal.bulkCreate([
+      {
+        midImg: "/static/images/大作.jpg",
+        bigImg: "/static/images/大作.jpg",
+        title: "大作",
+        description: "天行九歌",
+      },
+      {
+        midImg: "/static/images/田言.jpg",
+        bigImg: "/static/images/田言.jpg",
+        title: "田言",
+        description: "天行九歌-农家",
+      },
+      {
+        midImg: "/static/images/风景.jpg",
+        bigImg: "/static/images/风景.jpg",
+        title: "风景",
+        description: "赛尔风景",
+      },
+    ]); // 数组
   }
   console.log("数据库数据准备完毕");
 })();

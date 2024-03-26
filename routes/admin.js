@@ -2,10 +2,17 @@ var express = require("express");
 var router = express.Router();
 var { formatResponse, analysisToken } = require("../utils/tool");
 
-const { loginService } = require("../services/adminServices");
+const {
+  loginService,
+  updateAdminService,
+} = require("../services/adminServices");
+const { ValidationError } = require("../utils/errors");
 //登录
 router.post("/login", async function (req, res, next) {
   // 首先应该有一个验证码的验证
+  if (req.body.captcha.toLowerCase() !== req.session.captcha.toLowerCase()) {
+    throw new ValidationError("验证码错误");
+  }
   const result = await loginService(req.body);
   if (result.token) {
     res.setHeader("authentication", result.token);
@@ -26,6 +33,11 @@ router.get("/whoami", async function (req, res, next) {
       id: token.id,
     })
   );
+});
+
+// 修改
+router.post("/", async function (req, res, next) {
+  res.send(await updateAdminService(req.body));
 });
 
 module.exports = router;
