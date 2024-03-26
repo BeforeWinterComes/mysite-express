@@ -22,6 +22,7 @@ require("./dao/db");
 var adminRouter = require("./routes/admin");
 var captchaRouter = require("./routes/captcha");
 var bannerRouter = require("./routes/banner");
+var uploadRouter = require("./routes/upload");
 const md5 = require("md5");
 
 var app = express();
@@ -49,12 +50,14 @@ app.use(
     path: [
       { url: "/api/admin/login", methods: ["POST"] },
       { url: "/res/captcha", methods: ["GET"] },
+      { url: "/api/banner", methods: ["GET"] },
     ],
   })
 );
 app.use("/api/admin", adminRouter);
 app.use("/res/captcha", captchaRouter);
 app.use("/api/banner", bannerRouter);
+app.use("/api/upload", uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

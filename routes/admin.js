@@ -15,6 +15,7 @@ router.post("/login", async function (req, res, next) {
   }
   const result = await loginService(req.body);
   if (result.token) {
+    console.log(result.token);
     res.setHeader("authentication", result.token);
   }
   res.send(formatResponse(0, "", result.data));
