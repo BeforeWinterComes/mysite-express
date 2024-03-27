@@ -40,10 +40,13 @@ const findBlogByPageDao = async (pageInfo) => {
 };
 // 获取其中一个博客
 const findOneBlogDao = async (id) => {
-  return await blogModel.findAll({
-    where: {
-      id,
-    },
+  return await blogModel.findByPk(id, {
+    include: [
+      {
+        model: blogTypeModel,
+        as: "category",
+      },
+    ],
   });
 };
 

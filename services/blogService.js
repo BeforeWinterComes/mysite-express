@@ -1,9 +1,19 @@
 const { ValidationError } = require("../utils/errors");
 const validate = require("validate.js");
-const { formatResponse, handleDataPattern } = require("../utils/tool");
+const {
+  formatResponse,
+  handleDataPattern,
+  handleTOC,
+} = require("../utils/tool");
 const blogTypeModel = require("../dao/model/blogTypeModel");
-const { addBlogDao, findBlogByPageDao } = require("../dao/blogDao");
-const { addBlogToType } = require("../dao/blogTypeDao");
+const {
+  addBlogDao,
+  findBlogByPageDao,
+  findOneBlogDao,
+  updateBlogDao,
+  deleteBlogDao,
+} = require("../dao/blogDao");
+const { addBlogToType, findOneBlogTypeDao } = require("../dao/blogTypeDao");
 // 扩展验证规则
 validate.validators.categoryIdIsExit = async (value) => {
   const blogTypeInfo = blogTypeModel.findByPk(value);
@@ -15,8 +25,10 @@ validate.validators.categoryIdIsExit = async (value) => {
 // 新增博客
 module.exports.addBlogService = async function (newBlogInfo) {
   // 首先处理doc
+  // 经过handleTOC处理之后，现在的TOC就是我们想要的模式
+  newBlogInfo = handleTOC(newBlogInfo);
   // 接下来，我们将处理好的toc格式转化为字符串
-  newBlogInfo.toc = JSON.stringify('["a": "b"]');
+  newBlogInfo.toc = JSON.stringify(newBlogInfo.toc);
   // 初始化新文章的其他信息
   newBlogInfo.scanNumber = 0; // 阅读初始量为0
   newBlogInfo.commentNumber = 0; // 评论初始量为0
@@ -103,20 +115,38 @@ module.exports.findBlogByPageService = async function (pageInfo) {
   });
 };
 // 获取其中一个博客
-module.exports.findOneBlogService = async function (id) {
-  return formatResponse(0, "", handleDataPattern(await findOneBlogDao(id)));
+module.exports.findOneBlogService = async function (id, auth) {
+  const data = await findOneBlogDao(id);
+  // 首先重新处理toc
+  data.dataValues.toc = JSON.parse(data.dataValues.toc);
+  // 根据auth是否有值决定浏览数是否自增
+  if (!auth) {
+    data.scanNumber++;
+    await data.save();
+  }
+  return formatResponse(0, "", data.dataValues);
 };
 // 修改其中一个博客
 module.exports.updateBlogService = async function (id, blogInfo) {
-  return formatResponse(
-    0,
-    "",
-    handleDataPattern(await updateBlogDao(id, blogInfo))
-  );
+  // 首先判断正文内容有没有改变，因为正文改变可能会影响toc目录
+  if (blogInfo.htmlContent && blogInfo.toc) {
+    // 文章正文改变，需要重新处理toc目录
+    blogInfo.toc = JSON.parse(blogInfo.toc);
+  }
+  const { dataValues } = await updateBlogDao(id, blogInfo);
+  return formatResponse(0, "", dataValues);
 };
 // 删除其中一个博客
 module.exports.deleteBlogService = async function (id) {
+  // 根据id查询到该文章的信息
+  const data = await findOneBlogDao(id);
+  // 需要将该文章对应分类递减
+  const categoryInfo = await findOneBlogTypeDao(data.dataValues.categoryId);
+  categoryInfo.articleCount--;
+  console.log("123", categoryInfo);
+  await categoryInfo.save();
+  // 删除该文章下所有评论
+  // 删除文章
   await deleteBlogDao(id);
-  // 这里需要返回受影响文章数量
   return formatResponse(0, "", true);
 };

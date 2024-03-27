@@ -13,11 +13,7 @@ const findAllBlogTypeDao = async () => {
 };
 // 获取其中一个博客分类
 const findOneBlogTypeDao = async (id) => {
-  return await blogTypeModel.findAll({
-    where: {
-      id,
-    },
-  });
+  return await blogTypeModel.findByPk(id);
 };
 
 // 修改其中一个博客分类

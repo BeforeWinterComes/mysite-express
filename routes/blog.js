@@ -18,7 +18,8 @@ router.get("/", async function (req, res, next) {
 });
 // 获取其中一个博客
 router.get("/:id", async function (req, res, next) {
-  res.send(await findOneBlogService(req.params.id));
+  const reqHeaders = req.headers;
+  res.send(await findOneBlogService(req.params.id, reqHeaders.authorization));
 });
 // 修改其中一个博客
 router.put("/:id", async function (req, res, next) {
